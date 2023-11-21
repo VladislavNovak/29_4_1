@@ -9,81 +9,85 @@ using std::vector;
 
 class Talent {
 protected:
-    string name;
-    bool ability;
+    string ability;
+    bool status;
 
-    Talent(string inName, bool inAbility) : name{std::move(inName)}, ability{inAbility} {}
+    explicit Talent(bool inStatus) : status{inStatus} {}
 
 public:
-    virtual void changeFlag(bool flag) = 0;
-    virtual void showTalent() = 0;
+    void changeFlag() { status = !status; }
+
+    void showTalent() { cout << (status ? "  can " : "  can`t ") << ability << endl; }
 };
 
 // Каждая способность, наследуемая от абстрактного класса Talent,
 // должна быть представлена в виде отдельного класса.
 class TalentSwim : public Talent {
 public:
-    TalentSwim(string inName, bool inAbility) : Talent(std::move(inName), inAbility) {}
-
-    void changeFlag(bool flag) override { ability = flag; }
-
-    void showTalent() override { cout << (ability ? "ability " : "not ability ") << name << endl; }
+    explicit TalentSwim(bool inAbility) : Talent(inAbility) { ability = "swim"; }
 };
 
 class TalentDance : public Talent {
 public:
-    TalentDance(string inName, bool inAbility) : Talent(std::move(inName), inAbility) {}
-
-    void changeFlag(bool flag) override { ability = flag; }
-
-    void showTalent() override { cout << (ability ? "ability " : "not ability ") << name << endl; }
+    explicit TalentDance(bool inStatus) : Talent(inStatus) { ability = "dance"; }
 };
 
 class TalentCount : public Talent {
 public:
-    TalentCount(string inName, bool inAbility) : Talent(std::move(inName), inAbility) {}
-
-    void changeFlag(bool flag) override { ability = flag; }
-
-    void showTalent() override { cout << (ability ? "ability " : "not ability ") << name << endl; }
+    explicit TalentCount(bool inStatus) : Talent(inStatus) { ability = "count"; }
 };
 
 // ---
 
 class Animal {
 protected:
+    string name;
     vector<Talent*> talents;
-    virtual void doVoice() = 0;
+
     virtual void showTalents() = 0;
-};
 
-class Dog : public Animal {
+    virtual void setTalent(Talent*talent) = 0;
+
 public:
-    Dog() = default;
+    explicit Animal(string inName) : name{std::move(inName)} {}
 
-    void setTalent(Talent* talent) {
-        talents.emplace_back(talent);
-    }
-
-    void doVoice() override {
-        cout << "Voice" << endl;
-    }
-
-    void showTalents() override {
+    virtual ~Animal() {
         if (!talents.empty()) {
-            for (const auto &talent : talents) {
-                talent->showTalent();
-            }
+            for (auto &talent: talents) { delete talent; }
+            talents.clear();
         }
     }
 };
 
+class Dog : public Animal {
+public:
+    [[maybe_unused]] explicit Dog(string inName) : Animal(std::move(inName)) {};
+
+    void setTalent(Talent*talent) override { talents.emplace_back(talent); }
+
+    void changeTalent(int index) {
+        if (index >= 0 && index < talents.size()) {
+            talents[index]->changeFlag();
+        }
+    }
+
+    void showTalents() override {
+        if (!talents.empty()) {
+            cout << name << ":" << endl;
+            for (const auto &talent: talents) { talent->showTalent(); }
+        }
+    }
+};
 
 int main() {
-    Dog dog;
-    dog.setTalent(new TalentSwim("swim", true));
-    dog.setTalent(new TalentDance("dance", false));
-    dog.setTalent(new TalentCount("count", true));
+    Dog dog("Max");
+    dog.setTalent(new TalentSwim(true));
+    dog.setTalent(new TalentDance(false));
+    dog.setTalent(new TalentCount(true));
+
+    dog.showTalents();
+
+    dog.changeTalent(1);
 
     dog.showTalents();
 

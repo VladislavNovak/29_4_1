@@ -1,11 +1,24 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+
+template<typename T>
+int findKeyIndexInVector(const T &key, const std::vector<T> &list) {
+    const int NOT_FOUND = -1;
+    auto it = std::find_if(list.cbegin(), list.cend(), [key](const T &i){ return i == key; });
+
+    if (it != list.cend()) {
+        return (int)std::distance(list.cbegin(), it);
+    }
+
+    return NOT_FOUND;
+}
 
 class Talent {
 protected:
@@ -17,14 +30,15 @@ protected:
 public:
     void changeFlag() { status = !status; }
 
+    string getTalentName() { return ability; }
+
     void showTalent() { cout << (status ? "  can " : "  can`t ") << ability << endl; }
 };
 
-// Каждая способность, наследуемая от абстрактного класса Talent,
-// должна быть представлена в виде отдельного класса.
+// Группа похожих классов (TalentSwim, TalentDance, TalentCount) сделана лишь в демонстрационных целях:
 class TalentSwim : public Talent {
 public:
-    explicit TalentSwim(bool inAbility) : Talent(inAbility) { ability = "swim"; }
+    explicit TalentSwim(bool inStatus) : Talent(inStatus) { ability = "swim"; }
 };
 
 class TalentDance : public Talent {
@@ -46,7 +60,9 @@ protected:
 
     virtual void showTalents() = 0;
 
-    virtual void setTalent(Talent*talent) = 0;
+    virtual void setTalent(Talent* talent) = 0;
+
+    virtual int changeTalent(const string &talentName) = 0;
 
 public:
     explicit Animal(string inName) : name{std::move(inName)} {}
@@ -63,12 +79,21 @@ class Dog : public Animal {
 public:
     [[maybe_unused]] explicit Dog(string inName) : Animal(std::move(inName)) {};
 
-    void setTalent(Talent*talent) override { talents.emplace_back(talent); }
+    void setTalent(Talent* talent) override { talents.emplace_back(talent); }
 
-    void changeTalent(int index) {
-        if (index >= 0 && index < talents.size()) {
-            talents[index]->changeFlag();
-        }
+    // Талант можно поменять по наименованию
+    int changeTalent(const string &talentName) override {
+        if (talents.empty()) return -1;
+
+        vector<string> collection;
+        collection.reserve(talents.size());
+        for (auto &talent : talents) { collection.emplace_back(talent->getTalentName()); }
+
+        int index = findKeyIndexInVector(talentName,collection);
+        if (index == -1) return -1;
+
+        talents[index]->changeFlag();
+        return index;
     }
 
     void showTalents() override {
@@ -87,7 +112,8 @@ int main() {
 
     dog.showTalents();
 
-    dog.changeTalent(1);
+    // Можно менять таланты по их наименованию (swim/dance/count):
+    dog.changeTalent("dance");
 
     dog.showTalents();
 

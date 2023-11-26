@@ -58,5 +58,9 @@
 
 <a href="https://radioprog.ru/post/1267" style="margin-left:16px">Конструкторы и инициализация производных классов</a>
 
+<a href="https://iot-embedded.ru/programming_c_and_cpp/cpp-virtualnyj-destruktor/" style="margin-left:16px">C++ Виртуальный деструктор</a>
+
+<a href="https://ci-plus-plus-snachala.ru/?p=6074" style="margin-left:16px">Константные методы классов</a>
+
 </details>
 </details>

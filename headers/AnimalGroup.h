@@ -17,7 +17,7 @@ protected:
     string name;
     vector<Talent*> talents;
 
-    virtual void showTalents() = 0;
+    virtual void showTalents() const = 0;
 
     virtual void setTalent(Talent* talent) = 0;
 
@@ -26,17 +26,19 @@ protected:
 public:
     explicit Animal(string inName) : name{std::move(inName)} {}
 
-    virtual ~Animal() {
-        if (!talents.empty()) {
-            for (auto &talent: talents) { delete talent; }
-            talents.clear();
-        }
-    }
+    virtual ~Animal() = default;
 };
 
 class Dog : public Animal {
 public:
     [[maybe_unused]] explicit Dog(string inName) : Animal(std::move(inName)) {};
+
+    ~Dog() override {
+        if (!talents.empty()) {
+            for (auto &talent: talents) { delete talent; }
+            talents.clear();
+        }
+    }
 
     void setTalent(Talent* talent) override { talents.emplace_back(talent); }
 
@@ -55,7 +57,7 @@ public:
         return index;
     }
 
-    void showTalents() override {
+    void showTalents() const override {
         if (!talents.empty()) {
             cout << name << ":" << endl;
             for (const auto &talent: talents) { talent->showTalent(); }

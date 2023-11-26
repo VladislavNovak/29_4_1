@@ -20,7 +20,7 @@ public:
 
     string getTalentName() { return ability; }
 
-    void showTalent() { cout << (status ? "  can " : "  can`t ") << ability << endl; }
+    void showTalent() const { cout << (status ? "  can " : "  can`t ") << ability << endl; }
 };
 
 // Группа похожих классов (TalentSwim, TalentDance, TalentCount) сделана лишь в демонстрационных целях:
